@@ -1,0 +1,3 @@
+/home/rupix/projects/ants_colonization/build/CMakeFiles/AntColony.dir
+/home/rupix/projects/ants_colonization/build/CMakeFiles/edit_cache.dir
+/home/rupix/projects/ants_colonization/build/CMakeFiles/rebuild_cache.dir
