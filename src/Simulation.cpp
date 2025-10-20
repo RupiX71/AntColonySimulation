@@ -10,13 +10,6 @@ Simulation::Simulation()
         }
 
         ants.emplace_back(antTexture, sf::Vector2f(500,400));
-        ants.emplace_back(antTexture, sf::Vector2f(300,300));
-        ants.emplace_back(antTexture, sf::Vector2f(400,300));
-        ants.emplace_back(antTexture, sf::Vector2f(100,300));
-        ants.emplace_back(antTexture, sf::Vector2f(700,300));
-        ants.emplace_back(antTexture, sf::Vector2f(700,300));
-        ants.emplace_back(antTexture, sf::Vector2f(720,310));
-        ants.emplace_back(antTexture, sf::Vector2f(550,320));
 }
 
 Simulation::~Simulation() {
