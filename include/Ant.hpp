@@ -8,12 +8,14 @@ public:
     void draw(sf::RenderWindow& window);
 
 private:
-    sf::Sprite sprite;
+    sf::Sprite sprite;          // Sprite of the Ant
 
-    sf::Vector2f direction;
-    sf::Vector2f target;
-    float speed;
-    float wanderStrength;
+    sf::Vector2f velocity;      // Vector Velocity
+    sf::Vector2f acceleration;  // Vector Acceleration
+
+    float wanderAngle;          // Angle of wandering
+    float maxSpeed;             // Max Speed
+    float maxForce;             // Max Force
 
     sf::Clock animationClock;
     int currentFrame;
@@ -24,9 +26,9 @@ private:
 
     void wander(float dt);
     void move(float dt);
-    void handleBounds(sf::RenderWindow& window);
+    void steerTowards(const sf::Vector2f& desired);
     void animate();
 
     static float randomFloat(float min, float max);
-    static void normalize(sf::Vector2f& v);
+    static sf::Vector2f normalized(const sf::Vector2f& v);
 };

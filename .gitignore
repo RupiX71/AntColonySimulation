@@ -1,6 +1,6 @@
 # CMake
-/build/
-CMakeFiles/
+build/*
+CMakeFiles/*
 CMakeCache.txt
 cmake_install.cmake
 Makefile
@@ -8,6 +8,7 @@ Makefile
 # Executáveis
 *.exe
 *.out
+*.cpp.o
 
 # Editor
 .vscode/

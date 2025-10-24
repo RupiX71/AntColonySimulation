@@ -2,14 +2,19 @@
 #include <iostream>
 
 Simulation::Simulation()
-    : window(sf::VideoMode(1000, 800), "Ant Colony Simulation") {
+    : window(sf::VideoMode(1000, 800), "Ant Colony Simulation", sf::Style::Fullscreen) {
         window.setFramerateLimit(144);
 
         if (!antTexture.loadFromFile("res/ant.png")) {
             std::cerr << "Failed to load ant texture!\n";
         }
+    int numAnts = 20; // escolhe o número que quiseres
 
-        ants.emplace_back(antTexture, sf::Vector2f(500,400));
+    for (int i = 0; i < numAnts; ++i) {
+        float x = static_cast<float>(rand() % 1920);
+        float y = static_cast<float>(rand() % 1080);
+        ants.emplace_back(antTexture, sf::Vector2f(x, y));
+}
 }
 
 Simulation::~Simulation() {

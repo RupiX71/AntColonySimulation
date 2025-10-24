@@ -3,8 +3,9 @@
 #include <cstdlib>
 
 Ant::Ant(sf::Texture& texture, sf::Vector2f startPos)
-: speed(100.0f),
-  wanderStrength(1.0f),
+: maxSpeed(100.f),
+  maxForce(10.f),
+  acceleration(0.f, 0.f),
   frameWidth(44),
   frameHeight(64),
   totalFrames(4),
@@ -15,13 +16,15 @@ Ant::Ant(sf::Texture& texture, sf::Vector2f startPos)
     sprite.setTextureRect(sf::IntRect(0, 0, frameWidth, frameHeight));
     sprite.setOrigin(frameWidth / 2.f, frameHeight / 2.f);
     sprite.setPosition(startPos);
+
+    velocity = sf::Vector2f(0.f, 0.f);
+    acceleration = sf::Vector2f(0.f, 0.f);
 }
 
 void Ant::update(float dt, sf::RenderWindow& window)
 {
     wander(dt);
     move(dt);
-    handleBounds(window);
     animate();
 }
 
@@ -32,43 +35,35 @@ void Ant::draw(sf::RenderWindow& window)
 
 void Ant::wander(float dt)
 {
-    float change = randomFloat(-wanderStrength, wanderStrength) * dt;
-    float angle = std::atan2(direction.y, direction.x) + change;
+    float circleDistance = 100.f;
+    float circleRadius = 90.f;
+    float angleChange = 4.f;
 
-    direction.x = std::cos(angle);
-    direction.y = std::sin(angle);
-    normalize(direction);
+    sf::Vector2f circleCenter = normalized(velocity) * circleDistance;
+
+    wanderAngle += randomFloat(-angleChange, angleChange);
+    sf::Vector2f displacement(std::cos(wanderAngle) * circleRadius, std::sin(wanderAngle) * circleRadius);
+
+    sf::Vector2f wanderForce = circleCenter + displacement;
+
+    steerTowards(velocity + wanderForce);
+    velocity += acceleration * dt;
+    velocity = normalized(velocity) * maxSpeed;
 }
 
 void Ant::move(float dt)
 {
-    sprite.move(direction * speed * dt);
-
-    float angle = std::atan2(direction.y, direction.x);
+    sprite.move(velocity * dt);
+    float angle = std::atan2(velocity.y, velocity.x);
     sprite.setRotation(angle * 180 / M_PI + 90);
 }
-void Ant::handleBounds(sf::RenderWindow& window) {
-    sf::Vector2f pos = sprite.getPosition();
-    sf::Vector2f bounds(window.getSize());
 
-    if (pos.x < frameWidth / 2.f) {
-        pos.x = frameWidth / 2.f;
-        direction.x = std::abs(direction.x);
-    }
-    if (pos.x > bounds.x - frameWidth / 2.f) {
-        pos.x = bounds.x - frameWidth / 2.f;
-        direction.x = -std::abs(direction.x);
-    }
-
-    if (pos.y < frameHeight / 2.f) {
-        pos.y = frameHeight / 2.f;
-        direction.y = std::abs(direction.y);
-    }
-    if (pos.y > bounds.y - frameHeight / 2.f) {
-        pos.y = bounds.y - frameHeight / 2.f;
-        direction.y = -std::abs(direction.y);
-    }
+void Ant::steerTowards(const sf::Vector2f& desired) {
+    sf::Vector2f steer = normalized(desired) * maxSpeed;
+    sf::Vector2f force = normalized(steer - velocity) * maxForce;
+    acceleration +=force;
 }
+
 void Ant::animate()
 {
     if (animationClock.getElapsedTime().asSeconds() > frameDuration)
@@ -84,8 +79,9 @@ float Ant::randomFloat(float min, float max)
     return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
 }
 
-void Ant::normalize(sf::Vector2f& v)
+sf::Vector2f Ant::normalized(const sf::Vector2f& v)
 {
     float len = std::sqrt(v.x * v.x + v.y * v.y);
-    if (len != 0.f) v /= len;
+    if (len != 0.f) return v / len;
+    return {0.f, 0.f};
 }
