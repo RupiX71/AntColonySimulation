@@ -17,7 +17,7 @@ Simulation::Simulation()
     timeText.setCharacterSize(24);
     timeText.setFillColor(sf::Color::White);
     timeText.setPosition(20.f,20.f);
-    int numAnts = 1; // escolhe o número que quiseres
+    int numAnts = 500; // escolhe o número que quiseres
 
     for (int i = 0; i < numAnts; ++i) {
         float x = static_cast<float>(rand() % 1920);
@@ -34,10 +34,9 @@ void Simulation::run() {
     while (window.isOpen()) {
         processEvents();
         float dt = clock.restart().asSeconds();
+        timeCounter(dt);
         update(dt);
         render();
-        simulationTime += dt;
-        timeText.setString(std::to_string(simulationTime));
     }
 }
 
@@ -62,5 +61,18 @@ void Simulation::render() {
         ant.draw(window);
     }
     window.draw(timeText);
+
     window.display();
+}
+
+void Simulation::timeCounter(float dt) {
+    simulationTime += dt;
+    int minutes = static_cast<int>(simulationTime) / 60;
+    int seconds = static_cast<int>(simulationTime) % 60;
+
+    std::string timeString = 
+    (minutes < 10 ? "0" : "") + std::to_string(minutes) + ":" +
+    (seconds < 10 ? "0" : "") + std::to_string(seconds);
+
+    timeText.setString("Time: " + timeString);
 }

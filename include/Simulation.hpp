@@ -15,6 +15,7 @@ private:
     void processEvents();
     void update(float dt);
     void render();
+    void timeCounter(float dt);
 
     sf::RenderWindow window;
     sf::Clock clock;
