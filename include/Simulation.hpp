@@ -17,10 +17,15 @@ private:
     void render();
     void timeCounter(float dt);
 
+    
     sf::RenderWindow window;
+    sf::View view = window.getDefaultView();
     sf::Clock clock;
     sf::Font font;
     sf::Text timeText;
+
+    sf::Vector2f dragStart;
+    bool isDragging = false;
     
     float simulationTime = 0.f;
 

@@ -2,9 +2,8 @@
 #include <iostream>
 
 Simulation::Simulation()
-    : window(sf::VideoMode(1000, 800), "Ant Colony Simulation") {
+    : window(sf::VideoMode(1900,1000), "Ant Colony Simulation") {
         window.setFramerateLimit(144);
-
     if (!antTexture.loadFromFile("res/ant.png")) {
         std::cerr << "Failed to load ant texture!\n";
     }
@@ -17,11 +16,11 @@ Simulation::Simulation()
     timeText.setCharacterSize(24);
     timeText.setFillColor(sf::Color::White);
     timeText.setPosition(20.f,20.f);
-    int numAnts = 500; // escolhe o número que quiseres
+    int numAnts = 25000; // escolhe o número que quiseres
 
     for (int i = 0; i < numAnts; ++i) {
-        float x = static_cast<float>(rand() % 1920);
-        float y = static_cast<float>(rand() % 1080);
+        float x = static_cast<float>(rand() % 10000);
+        float y = static_cast<float>(rand() % 10000);
         ants.emplace_back(antTexture, sf::Vector2f(x, y));
     }
 }
@@ -46,6 +45,20 @@ void Simulation::processEvents() {
         if (event.type == sf::Event::Closed) {
             window.close();
         }
+        if (event.type == sf::Event::MouseWheelScrolled) {
+            view.zoom(event.mouseWheelScroll.delta > 0 ? 0.9f : 1.1f);
+        }
+        if (event.type == sf::Event::MouseButtonPressed) {
+            isDragging = true;
+            dragStart = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        }
+        if (event.type == sf::Event::MouseButtonReleased) {
+            isDragging = false;
+            sf::Vector2f current = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            sf::Vector2f offset = dragStart - current;
+            view.move(offset);
+            dragStart = current;
+        }
     }
 }
 
@@ -57,9 +70,11 @@ void Simulation::update(float dt) {
 
 void Simulation::render() {
     window.clear();
+    window.setView(view);
     for (auto& ant : ants) {
         ant.draw(window);
     }
+    window.setView(window.getDefaultView());
     window.draw(timeText);
 
     window.display();
