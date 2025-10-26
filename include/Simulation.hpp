@@ -18,8 +18,11 @@ private:
 
     sf::RenderWindow window;
     sf::Clock clock;
+    sf::Font font;
+    sf::Text timeText;
+    
+    float simulationTime = 0.f;
 
     sf::Texture antTexture;
     std::vector<Ant> ants;
-    
 };
