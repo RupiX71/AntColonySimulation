@@ -16,7 +16,7 @@ private:
     void update(float dt);
     void render();
     void timeCounter(float dt);
-
+    void reset();
     
     sf::RenderWindow window;
     sf::View view = window.getDefaultView();
@@ -25,8 +25,11 @@ private:
     sf::Text timeText;
 
     sf::Vector2f dragStart;
-    bool isDragging = false;
     
+    bool isDragging = false;
+    bool paused = false;
+    bool stepOnce = false;
+
     float simulationTime = 0.f;
 
     sf::Texture antTexture;

@@ -36,8 +36,8 @@ void Ant::draw(sf::RenderWindow& window)
 void Ant::wander(float dt)
 {
     float circleDistance = 100.f;
-    float circleRadius = 90.f;
-    float angleChange = 4.f;
+    float circleRadius = M_PI/6;
+    float angleChange = 1.f;
 
     sf::Vector2f circleCenter = normalized(velocity) * circleDistance;
 
@@ -61,7 +61,7 @@ void Ant::move(float dt)
 void Ant::steerTowards(const sf::Vector2f& desired) {
     sf::Vector2f steer = normalized(desired) * maxSpeed;
     sf::Vector2f force = normalized(steer - velocity) * maxForce;
-    acceleration +=force;
+    acceleration += force;
 }
 
 void Ant::animate()

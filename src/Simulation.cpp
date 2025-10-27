@@ -16,11 +16,11 @@ Simulation::Simulation()
     timeText.setCharacterSize(24);
     timeText.setFillColor(sf::Color::White);
     timeText.setPosition(20.f,20.f);
-    int numAnts = 25000; // escolhe o número que quiseres
+    int numAnts = 2; // escolhe o número que quiseres
 
     for (int i = 0; i < numAnts; ++i) {
-        float x = static_cast<float>(rand() % 10000);
-        float y = static_cast<float>(rand() % 10000);
+        float x = static_cast<float>(rand() % 600);
+        float y = static_cast<float>(rand() % 600);
         ants.emplace_back(antTexture, sf::Vector2f(x, y));
     }
 }
@@ -33,10 +33,15 @@ void Simulation::run() {
     while (window.isOpen()) {
         processEvents();
         float dt = clock.restart().asSeconds();
-        timeCounter(dt);
-        update(dt);
+
+        if (!paused || stepOnce) {
+            timeCounter(dt);
+            update(dt);
+            stepOnce = false;
+        }
         render();
-    }
+}
+
 }
 
 void Simulation::processEvents() {
@@ -54,10 +59,22 @@ void Simulation::processEvents() {
         }
         if (event.type == sf::Event::MouseButtonReleased) {
             isDragging = false;
-            sf::Vector2f current = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-            sf::Vector2f offset = dragStart - current;
-            view.move(offset);
-            dragStart = current;
+        }
+        if (event.type == sf::Event::KeyPressed) {
+            if (event.key.code == sf::Keyboard::Space) {
+                if (!paused) {
+                    paused = true;
+                }
+                else {
+                    paused = false;
+                }
+            }
+            if (event.key.code == sf::Keyboard::Right) {
+                stepOnce = true;
+            }
+            if (event.key.code == sf::Keyboard::R) {
+                reset();
+            }
         }
     }
 }
@@ -65,6 +82,13 @@ void Simulation::processEvents() {
 void Simulation::update(float dt) {
     for (auto& ant : ants) {
         ant.update(dt, window);
+    }
+    
+    if (isDragging) {
+        sf::Vector2f current = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        sf::Vector2f offset = dragStart - current;
+        view.move(offset);
+        dragStart = current;
     }
 }
 
@@ -84,10 +108,23 @@ void Simulation::timeCounter(float dt) {
     simulationTime += dt;
     int minutes = static_cast<int>(simulationTime) / 60;
     int seconds = static_cast<int>(simulationTime) % 60;
+    int miliseconds = static_cast<int>((simulationTime - static_cast<int>(simulationTime)) * 1000);
 
     std::string timeString = 
     (minutes < 10 ? "0" : "") + std::to_string(minutes) + ":" +
-    (seconds < 10 ? "0" : "") + std::to_string(seconds);
+    (seconds < 10 ? "0" : "") + std::to_string(seconds) + ":" +
+    (miliseconds < 100 ? (miliseconds < 10 ? "00" : "0") : "") + std::to_string(miliseconds);
 
     timeText.setString("Time: " + timeString);
+}
+
+void Simulation::reset() {
+    ants.clear();
+    simulationTime = 0.f;
+
+    for (int i = 0 ; i < 2 ; i++) {
+        float x = static_cast<float>(rand() % window.getSize().x);
+        float y = static_cast<float>(rand() % window.getSize().y);
+        ants.emplace_back(antTexture, sf::Vector2f(x,y));
+    }
 }
