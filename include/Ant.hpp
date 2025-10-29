@@ -6,6 +6,10 @@ public:
     Ant(sf::Texture& texture, sf::Vector2f startPos);
     void update(float dt, sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
+    const sf::Sprite& getSprite() const { return sprite; }
+    sf::Vector2f getPosition() const { return sprite.getPosition(); }
+    sf::Vector2f getVelocity() const { return velocity; }
+    sf::Vector2f getAcceleration() const { return acceleration; }
 
 private:
     sf::Sprite sprite;          // Sprite of the Ant
@@ -13,9 +17,9 @@ private:
     sf::Vector2f velocity;      // Vector Velocity
     sf::Vector2f acceleration;  // Vector Acceleration
 
-    float wanderAngle;          // Angle of wandering
     float maxSpeed;             // Max Speed
-    float maxForce;             // Max Force
+    float maxForce;             // Max Acceleration
+    float wanderAngle;  // Angle of wandering
 
     sf::Clock animationClock;
     int currentFrame;

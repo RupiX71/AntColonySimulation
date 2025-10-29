@@ -15,12 +15,18 @@ Simulation::Simulation()
     timeText.setFont(font);
     timeText.setCharacterSize(24);
     timeText.setFillColor(sf::Color::White);
+    velText.setFont(font);
+    velText.setCharacterSize(24);
+    velText.setFillColor(sf::Color::White);
+    accelText.setFont(font);
+    accelText.setCharacterSize(24);
+    accelText.setFillColor(sf::Color::White);
     timeText.setPosition(20.f,20.f);
-    int numAnts = 2; // escolhe o número que quiseres
+    int numAnts = 1; // escolhe o número que quiseres
 
     for (int i = 0; i < numAnts; ++i) {
-        float x = static_cast<float>(rand() % 600);
-        float y = static_cast<float>(rand() % 600);
+        float x = static_cast<float>(rand() % 5000);
+        float y = static_cast<float>(rand() % 5000);
         ants.emplace_back(antTexture, sf::Vector2f(x, y));
     }
 }
@@ -39,6 +45,7 @@ void Simulation::run() {
             update(dt);
             stepOnce = false;
         }
+        drag();
         render();
 }
 
@@ -75,6 +82,17 @@ void Simulation::processEvents() {
             if (event.key.code == sf::Keyboard::R) {
                 reset();
             }
+
+            if (event.key.code == sf::Keyboard::Up) {
+                if (!ants.empty()) {
+                    selectedAntIndex = (selectedAntIndex + 1) % ants.size();
+                }
+            }
+            if (event.key.code == sf::Keyboard::Down) {
+                if (!ants.empty()) {
+                    selectedAntIndex = (selectedAntIndex - 1 + ants.size()) % ants.size();
+                }
+            }
         }
     }
 }
@@ -83,24 +101,46 @@ void Simulation::update(float dt) {
     for (auto& ant : ants) {
         ant.update(dt, window);
     }
-    
-    if (isDragging) {
-        sf::Vector2f current = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-        sf::Vector2f offset = dragStart - current;
-        view.move(offset);
-        dragStart = current;
-    }
 }
 
 void Simulation::render() {
-    window.clear();
     window.setView(view);
+    window.clear();
     for (auto& ant : ants) {
         ant.draw(window);
     }
+
+    if (selectedAntIndex >= 0 && selectedAntIndex < ants.size()) { // What the fuck is this ??? change this lmao?
+        const Ant& selected = ants[selectedAntIndex];
+        sf::Vector2f pos = selected.getPosition();
+        sf::Vector2f vel = selected.getVelocity();
+        velText.setPosition(20.f, 40.f);
+        std::string velstring = (std::to_string(vel.x) + "," + std::to_string(vel.y));
+        velText.setString("Velocity: " + velstring);
+        sf::VertexArray velocityLine(sf::Lines, 2);
+        velocityLine[0].position = pos;
+        velocityLine[0].color = sf::Color::Cyan;
+        velocityLine[1].position = pos + vel;
+        velocityLine[1].color = sf::Color::Cyan;
+
+        sf::Vector2f acc = selected.getAcceleration();
+        accelText.setPosition(20.f, 60.f);
+        std::string accelstring = (std::to_string(acc.x) + "," + std::to_string(acc.y));
+        accelText.setString("Acceleration: " + accelstring);
+        sf::VertexArray accelLine(sf::Lines, 2);
+        accelLine[0].position = pos;
+        accelLine[0].color = sf::Color::Red;
+        accelLine[1].position = pos + acc;
+        accelLine[1].color = sf::Color::Red;
+
+        window.draw(velocityLine);
+        window.draw(accelLine);
+    }
+    
     window.setView(window.getDefaultView());
     window.draw(timeText);
-
+    window.draw(velText);
+    window.draw(accelText);
     window.display();
 }
 
@@ -122,9 +162,18 @@ void Simulation::reset() {
     ants.clear();
     simulationTime = 0.f;
 
-    for (int i = 0 ; i < 2 ; i++) {
+    for (int i = 0 ; i < 1 ; i++) {
         float x = static_cast<float>(rand() % window.getSize().x);
         float y = static_cast<float>(rand() % window.getSize().y);
         ants.emplace_back(antTexture, sf::Vector2f(x,y));
+    }
+}
+
+void Simulation::drag() {
+    if (isDragging) {
+        sf::Vector2f current = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        sf::Vector2f offset = dragStart - current;
+        view.move(offset);
+        dragStart = current;
     }
 }
