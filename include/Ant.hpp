@@ -1,6 +1,18 @@
+/**
+ * @file Ant.hpp
+ * @brief Defines the Ant class
+ * 
+ * @date 2025-10-30
+ * @author rupixe
+*/
+
 #pragma once
 #include <SFML/Graphics.hpp>
 
+/**
+ * @class Ant
+ * @brief Manages the entire Ant behaviour
+*/
 class Ant {
 public:
     Ant(sf::Texture& texture, sf::Vector2f startPos);

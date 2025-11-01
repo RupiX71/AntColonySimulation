@@ -51,7 +51,7 @@ void Ant::wander(float dt)
 
     steerTowards(wanderForce);
     velocity += acceleration * dt;
-    if (velocity.x > maxSpeed || velocity.y > maxSpeed)
+    if (std::abs(velocity.x) > maxSpeed || std::abs(velocity.y) > maxSpeed)
         velocity = normalized(velocity) * maxSpeed;
 }
 

@@ -11,7 +11,6 @@ Simulation::Simulation()
     if (!font.loadFromFile("res/Cascadia.ttf")) {
         std::cerr << "Failed to load font file!\n";
     }
-
     timeText.setFont(font);
     timeText.setCharacterSize(24);
     timeText.setFillColor(sf::Color::White);
@@ -22,7 +21,7 @@ Simulation::Simulation()
     accelText.setCharacterSize(24);
     accelText.setFillColor(sf::Color::White);
     timeText.setPosition(20.f,20.f);
-    int numAnts = 1; // escolhe o número que quiseres
+    int numAnts = 500; // escolhe o número que quiseres
 
     for (int i = 0; i < numAnts; ++i) {
         float x = static_cast<float>(rand() % 5000);
@@ -162,7 +161,7 @@ void Simulation::reset() {
     ants.clear();
     simulationTime = 0.f;
 
-    for (int i = 0 ; i < 1 ; i++) {
+    for (int i = 0 ; i < 600 ; i++) {
         float x = static_cast<float>(rand() % window.getSize().x);
         float y = static_cast<float>(rand() % window.getSize().y);
         ants.emplace_back(antTexture, sf::Vector2f(x,y));
