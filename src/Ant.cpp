@@ -3,14 +3,14 @@
 #include <cstdlib>
 
 Ant::Ant(sf::Texture& texture, sf::Vector2f startPos)
-: maxSpeed(150.f),
-  maxForce(0.5f),
+: maxSpeed(100.f),
+  maxForce(0.4f),
   velocity(0.f, 0.f),
   acceleration(0.f, 0.f),
   frameWidth(44),
   frameHeight(64),
   totalFrames(4),
-  frameDuration(0.10f),
+  frameDuration(0.15f),
   currentFrame(0)
 {
     sprite.setTexture(texture);
@@ -59,6 +59,7 @@ void Ant::steerTowards(const sf::Vector2f& desired) {
     sf::Vector2f steer = normalized(desired) * maxSpeed;
     sf::Vector2f force = normalized(steer - velocity) * maxForce;
     acceleration += force;
+
 }
 
 void Ant::move(float dt)

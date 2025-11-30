@@ -2,7 +2,7 @@
 #include <iostream>
 
 Simulation::Simulation()
-    : window(sf::VideoMode(1900,1000), "Ant Colony Simulation") {
+    : window(sf::VideoMode(1870,970), "Ant Colony Simulation") {
         window.setFramerateLimit(144);
     if (!antTexture.loadFromFile("res/ant.png")) {
         std::cerr << "Failed to load ant texture!\n";
@@ -21,11 +21,11 @@ Simulation::Simulation()
     accelText.setCharacterSize(24);
     accelText.setFillColor(sf::Color::White);
     timeText.setPosition(20.f,20.f);
-    int numAnts = 500; // escolhe o número que quiseres
+    int numAnts = 5;
 
     for (int i = 0; i < numAnts; ++i) {
-        float x = static_cast<float>(rand() % 5000);
-        float y = static_cast<float>(rand() % 5000);
+        float x = static_cast<float>(rand() % numAnts*10);
+        float y = static_cast<float>(rand() % numAnts*10);
         ants.emplace_back(antTexture, sf::Vector2f(x, y));
     }
 }
@@ -160,10 +160,10 @@ void Simulation::timeCounter(float dt) {
 void Simulation::reset() {
     ants.clear();
     simulationTime = 0.f;
-
-    for (int i = 0 ; i < 600 ; i++) {
-        float x = static_cast<float>(rand() % window.getSize().x);
-        float y = static_cast<float>(rand() % window.getSize().y);
+    int numAnts = 5;
+    for (int i = 0 ; i < numAnts ; i++) {
+        float x = static_cast<float>(rand() % numAnts*10);
+        float y = static_cast<float>(rand() % numAnts*10);
         ants.emplace_back(antTexture, sf::Vector2f(x,y));
     }
 }

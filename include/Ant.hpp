@@ -13,11 +13,13 @@
  * @class Ant
  * @brief Manages the entire Ant behaviour
 */
+
 class Ant {
 public:
     Ant(sf::Texture& texture, sf::Vector2f startPos);
     void update(float dt, sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
+
     const sf::Sprite& getSprite() const { return sprite; }
     sf::Vector2f getPosition() const { return sprite.getPosition(); }
     sf::Vector2f getVelocity() const { return velocity; }
@@ -31,20 +33,20 @@ private:
 
     float maxSpeed;             // Max Speed
     float maxForce;             // Max Acceleration
-    float wanderAngle;  // Angle of wandering
+    float wanderAngle;          // Angle of wandering
 
-    sf::Clock animationClock;
-    int currentFrame;
-    int totalFrames;
-    float frameDuration;
-    int frameWidth;
-    int frameHeight;
+    sf::Clock animationClock;   // Clock for the sprite animation
+    int currentFrame;           // Frame counter for animation
+    int totalFrames;            // Total frame of the animations
+    float frameDuration;        // Frame duration of each animation
+    int frameWidth;             // Frame width
+    int frameHeight;            // Frame height
 
-    void wander(float dt);
-    void move(float dt);
-    void steerTowards(const sf::Vector2f& desired);
-    void animate();
+    void wander(float dt);                                  // Wander Function
+    void move(float dt);                                    // Move function
+    void steerTowards(const sf::Vector2f& desired);         // Steer function
+    void animate();                                         // Animate function
 
-    static float randomFloat(float min, float max);
-    static sf::Vector2f normalized(const sf::Vector2f& v);
+    static float randomFloat(float min, float max);         // Random value function 
+    static sf::Vector2f normalized(const sf::Vector2f& v);  // Normalizing function
 };
