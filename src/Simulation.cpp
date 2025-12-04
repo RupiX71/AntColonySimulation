@@ -3,7 +3,6 @@
 
 Simulation::Simulation()
     : window(sf::VideoMode(1870,970), "Ant Colony Simulation") {
-        window.setFramerateLimit(144);
     if (!antTexture.loadFromFile("res/ant.png")) {
         std::cerr << "Failed to load ant texture!\n";
     }
@@ -21,7 +20,7 @@ Simulation::Simulation()
     accelText.setCharacterSize(24);
     accelText.setFillColor(sf::Color::White);
     timeText.setPosition(20.f,20.f);
-    int numAnts = 5;
+    int numAnts = 1000;
 
     for (int i = 0; i < numAnts; ++i) {
         float x = static_cast<float>(rand() % numAnts*10);
@@ -39,15 +38,26 @@ void Simulation::run() {
         processEvents();
         float dt = clock.restart().asSeconds();
 
+        if (dt > 0.25f) {
+            dt = 0.25f;
+        }
+        
         if (!paused || stepOnce) {
-            timeCounter(dt);
-            update(dt);
+            accumulator += dt;
+        }
+
+        if (!paused || stepOnce) {
+            while (accumulator >= TIME_STEP) {
+                update(TIME_STEP);
+                timeCounter(TIME_STEP);
+
+                accumulator -= TIME_STEP;
+            }
             stepOnce = false;
         }
         drag();
         render();
-}
-
+    }
 }
 
 void Simulation::processEvents() {
@@ -160,12 +170,6 @@ void Simulation::timeCounter(float dt) {
 void Simulation::reset() {
     ants.clear();
     simulationTime = 0.f;
-    int numAnts = 5;
-    for (int i = 0 ; i < numAnts ; i++) {
-        float x = static_cast<float>(rand() % numAnts*10);
-        float y = static_cast<float>(rand() % numAnts*10);
-        ants.emplace_back(antTexture, sf::Vector2f(x,y));
-    }
 }
 
 void Simulation::drag() {

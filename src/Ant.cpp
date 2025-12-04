@@ -4,7 +4,7 @@
 
 Ant::Ant(sf::Texture& texture, sf::Vector2f startPos)
 : maxSpeed(100.f),
-  maxForce(0.4f),
+  maxForce(20.f),
   velocity(0.f, 0.f),
   acceleration(0.f, 0.f),
   frameWidth(44),
@@ -17,13 +17,7 @@ Ant::Ant(sf::Texture& texture, sf::Vector2f startPos)
     sprite.setTextureRect(sf::IntRect(0, 0, frameWidth, frameHeight));
     sprite.setOrigin(frameWidth / 2.f, frameHeight / 2.f);
     sprite.setPosition(startPos);
-}
-
-void Ant::update(float dt, sf::RenderWindow& window)
-{
-    wander(dt);
-    move(dt);
-    animate();
+    sprite.scale(sf::Vector2f(1.f, 1.f));
 }
 
 void Ant::draw(sf::RenderWindow& window)
@@ -31,35 +25,48 @@ void Ant::draw(sf::RenderWindow& window)
     window.draw(sprite);
 }
 
-void Ant::wander(float dt)
+void Ant::update(float dt, sf::RenderWindow& window)
 {
-    float circleDistance = 60.f;
-    float circleRadius = 30.f;
-    float angleChange = M_PI/18.f;
-    float fov = M_PI/6.f;
+    acceleration = sf::Vector2f(0.f,0.f);
+
+    calculateWanderForce(dt);
+
+    integratePhysics(dt);
+
+    move(dt);
+
+    animate();
+}
+
+void Ant::calculateWanderForce(float dt)
+{
+    float circleDistance = maxSpeed;
+    float circleRadius = 100.f;
+    float angleChange = M_PI/6.f;
+    
 
     sf::Vector2f circleCenter = normalized(velocity) * circleDistance;
 
     wanderAngle += randomFloat(-angleChange, angleChange);
 
-    //if (wanderAngle > fov) wanderAngle = fov;
-    //if (wanderAngle < -fov) wanderAngle = -fov;
-
     sf::Vector2f displacement(std::cos(wanderAngle) * circleRadius, std::sin(wanderAngle) * circleRadius);
-
     sf::Vector2f wanderForce = circleCenter + displacement;
 
     steerTowards(wanderForce);
-    velocity += acceleration * dt;
-    if (std::abs(velocity.x) > maxSpeed || std::abs(velocity.y) > maxSpeed)
-        velocity = normalized(velocity) * maxSpeed;
 }
 
 void Ant::steerTowards(const sf::Vector2f& desired) {
     sf::Vector2f steer = normalized(desired) * maxSpeed;
     sf::Vector2f force = normalized(steer - velocity) * maxForce;
     acceleration += force;
+}
 
+void Ant::integratePhysics(float dt) {
+    velocity += acceleration * dt;
+
+    if (std::abs(velocity.x) > maxSpeed || std::abs(velocity.y) > maxSpeed) {
+        velocity = normalized(velocity) * maxSpeed;
+    }
 }
 
 void Ant::move(float dt)

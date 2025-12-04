@@ -32,7 +32,7 @@ private:
     sf::Vector2f acceleration;  // Vector Acceleration
 
     float maxSpeed;             // Max Speed
-    float maxForce;             // Max Acceleration
+    float maxForce;             // Max 
     float wanderAngle;          // Angle of wandering
 
     sf::Clock animationClock;   // Clock for the sprite animation
@@ -44,7 +44,9 @@ private:
 
     void wander(float dt);                                  // Wander Function
     void move(float dt);                                    // Move function
+    void calculateWanderForce(float dt);                    
     void steerTowards(const sf::Vector2f& desired);         // Steer function
+    void integratePhysics(float dt);                        // 
     void animate();                                         // Animate function
 
     static float randomFloat(float min, float max);         // Random value function 

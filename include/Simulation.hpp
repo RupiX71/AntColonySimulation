@@ -71,6 +71,8 @@ private:
     // Timing and Display
     // ─────────────────────────────
     sf::Clock clock;                            ///< Frame timing clock.
+    const float TIME_STEP = 1.0f/60.f;          ///< 60fps Physics.
+    float accumulator = 0.0f;                   ///< Acumulator.
     sf::Font font;                              ///< Font used for text rendering.
     sf::Text timeText;                          ///< Displays simulation time.
     sf::Text velText;                           ///< Displays selected ant velocity (debug).
