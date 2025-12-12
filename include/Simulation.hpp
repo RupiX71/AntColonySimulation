@@ -42,8 +42,11 @@ public:
     void run();
 
 private:
-    /** @brief Handles all SFML window and keyboard/mouse input events. */
+    /** @brief Handles all SFML window and mouse input events. */
     void processEvents();
+
+    /** @brief Handles keyboard events */
+    void handleInput(sf::Keyboard::Key key);
 
     /** @brief Updates all simulation entities and logic for the current frame. */
     void update(float dt);
@@ -51,6 +54,9 @@ private:
     /** @brief Renders ants, UI, and other visual elements to the window. */
     void render();
 
+    /** @brief idk yet */
+    void renderSelectedAntDebug();
+    
     /** @brief Tracks and updates the elapsed simulation time. */
     void timeCounter(float dt);
 

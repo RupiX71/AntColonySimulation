@@ -1,46 +1,40 @@
 #include <Simulation.hpp>
 #include <iostream>
+#include <iomanip> // For std::precision
+#include <sstream>
 
 Simulation::Simulation()
-    : window(sf::VideoMode(1870,970), "Ant Colony Simulation") {
-    if (!antTexture.loadFromFile("res/ant.png")) {
-        std::cerr << "Failed to load ant texture!\n";
-    }
+    : window(sf::VideoMode(1870,970), "Ant Colony Simulation") 
+    , view(window.getDefaultView()) // Initialize the view correctly
+{
 
-    if (!font.loadFromFile("res/Cascadia.ttf")) {
-        std::cerr << "Failed to load font file!\n";
-    }
-    timeText.setFont(font);
-    timeText.setCharacterSize(24);
-    timeText.setFillColor(sf::Color::White);
-    velText.setFont(font);
-    velText.setCharacterSize(24);
-    velText.setFillColor(sf::Color::White);
-    accelText.setFont(font);
-    accelText.setCharacterSize(24);
-    accelText.setFillColor(sf::Color::White);
-    timeText.setPosition(20.f,20.f);
-    int numAnts = 5;
+    // Loading Files
+    if (!antTexture.loadFromFile("res/ant.png")) { std::cerr << "Failed to load ant texture!\n"; }
+    if (!font.loadFromFile("res/Cascadia.ttf")) { std::cerr << "Failed to load font file!\n"; }
 
-    for (int i = 0; i < numAnts; ++i) {
-        float x = static_cast<float>(rand() % numAnts*10);
-        float y = static_cast<float>(rand() % numAnts*10);
-        ants.emplace_back(antTexture, sf::Vector2f(x, y));
-    }
+    auto setupText = [&](sf::Text& text, float yPos) {
+        text.setFont(font);
+        text.setCharacterSize(20);
+        text.setFillColor(sf::Color::White);
+        text.setPosition(20.f, yPos);
+    };
+
+    setupText(timeText, 20.f);
+    setupText(velText, 50.f);
+    setupText(accelText, 80.f);
+
+    // Initial Reset
+    reset();
 }
 
 Simulation::~Simulation() {
-    // Do something here
 }
 
 void Simulation::run() {
     while (window.isOpen()) {
         processEvents();
         float dt = clock.restart().asSeconds();
-
-        if (dt > 0.25f) {
-            dt = 0.25f;
-        }
+        if (dt > 0.25f) { dt = 0.25f; }
         
         if (!paused || stepOnce) {
             accumulator += dt;
@@ -63,46 +57,53 @@ void Simulation::run() {
 void Simulation::processEvents() {
     sf::Event event;
     while(window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
-            window.close();
-        }
-        if (event.type == sf::Event::MouseWheelScrolled) {
-            view.zoom(event.mouseWheelScroll.delta > 0 ? 0.9f : 1.1f);
-        }
-        if (event.type == sf::Event::MouseButtonPressed) {
-            isDragging = true;
-            dragStart = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-        }
-        if (event.type == sf::Event::MouseButtonReleased) {
-            isDragging = false;
-        }
-        if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Space) {
-                if (!paused) {
-                    paused = true;
-                    timeText.setString("PAUSED");
+        switch(event.type) {
+            case sf::Event::Closed:
+                window.close();
+                break;
+            
+            case sf::Event::MouseWheelScrolled:
+                view.zoom(event.mouseWheelScroll.delta > 0 ? 0.9f : 1.1f);
+                break;
+            
+            case sf::Event::MouseButtonPressed:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    isDragging = true;
+                    dragStart = window.mapPixelToCoords(sf::Mouse::getPosition(window));
                 }
-                else {
-                    paused = false;
+                break;
+            
+            case sf::Event::MouseButtonReleased:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    isDragging = false;
                 }
-            }
-            if (event.key.code == sf::Keyboard::Right) {
-                stepOnce = true;
-            }
-            if (event.key.code == sf::Keyboard::R) {
-                reset();
-            }
+                break;
 
-            if (event.key.code == sf::Keyboard::Up) {
-                if (!ants.empty()) {
-                    selectedAntIndex = (selectedAntIndex + 1) % ants.size();
-                }
-            }
-            if (event.key.code == sf::Keyboard::Down) {
-                if (!ants.empty()) {
-                    selectedAntIndex = (selectedAntIndex - 1 + ants.size()) % ants.size();
-                }
-            }
+            case sf::Event::KeyPressed:
+                handleInput(event.key.code);
+                break;
+
+            default: break;
+        }
+    }
+}
+
+void Simulation::handleInput(sf::Keyboard::Key key) {
+    if (key == sf::Keyboard::Space) {
+        paused = !paused;
+
+        if (paused) { timeText.setString(timeText.getString() + " [PAUSED] "); }
+    }
+
+    if (key == sf::Keyboard::Right) { stepOnce = true; }
+    if (key == sf::Keyboard::R) { reset(); }
+
+    if (!ants.empty()) {
+        if (key == sf::Keyboard::Up) {
+            selectedAntIndex = (selectedAntIndex + 1) % ants.size();
+        }
+        else if (key == sf::Keyboard::Down) {
+            selectedAntIndex = (selectedAntIndex - 1 + ants.size()) % ants.size();
         }
     }
 }
@@ -114,71 +115,85 @@ void Simulation::update(float dt) {
 }
 
 void Simulation::render() {
+    window.clear(sf::Color(20, 20, 30));
+
     window.setView(view);
-    window.clear();
     for (auto& ant : ants) {
         ant.draw(window);
     }
-
-    if (selectedAntIndex >= 0 && selectedAntIndex < ants.size()) { // What the fuck is this ??? change this lmao?
-        const Ant& selected = ants[selectedAntIndex];
-        sf::Vector2f pos = selected.getPosition();
-        sf::Vector2f vel = selected.getVelocity();
-        velText.setPosition(20.f, 40.f);
-        std::string velstring = (std::to_string(vel.x) + "," + std::to_string(vel.y));
-        velText.setString("Velocity: " + velstring);
-        sf::VertexArray velocityLine(sf::Lines, 2);
-        velocityLine[0].position = pos;
-        velocityLine[0].color = sf::Color::Cyan;
-        velocityLine[1].position = pos + vel;
-        velocityLine[1].color = sf::Color::Cyan;
-
-        sf::Vector2f acc = selected.getAcceleration();
-        accelText.setPosition(20.f, 60.f);
-        std::string accelstring = (std::to_string(acc.x) + "," + std::to_string(acc.y));
-        accelText.setString("Acceleration: " + accelstring);
-        sf::VertexArray accelLine(sf::Lines, 2);
-        accelLine[0].position = pos;
-        accelLine[0].color = sf::Color::Red;
-        accelLine[1].position = pos + acc;
-        accelLine[1].color = sf::Color::Red;
-
-        window.draw(velocityLine);
-        window.draw(accelLine);
-    }
     
+    renderSelectedAntDebug();
+    
+
     window.setView(window.getDefaultView());
     window.draw(timeText);
-    window.draw(velText);
-    window.draw(accelText);
+
+    if (selectedAntIndex != -1) {
+        window.draw(velText);
+        window.draw(accelText);
+    }
+
     window.display();
+}
+
+void Simulation::renderSelectedAntDebug() {
+    if (selectedAntIndex < 0 || selectedAntIndex >= ants.size()) return;
+
+    const Ant& selected = ants[selectedAntIndex];
+    sf::Vector2f pos = selected.getPosition();
+    sf::Vector2f vel = selected.getVelocity();
+    sf::Vector2f acc = selected.getAcceleration();
+
+    std::ostringstream ssVel, ssAcc;
+    ssVel << std::fixed << std::setprecision(2) << "Vel: (" << vel.x << ", " << vel.y << ")";
+    ssAcc << std::fixed << std::setprecision(2) << "Acc: (" << acc.x << ", " << acc.y << ")";
+
+    velText.setString(ssVel.str());
+    accelText.setString(ssAcc.str());
+
+    auto drawVectors = [&](sf::Vector2f vector, sf::Color color) {
+        sf::VertexArray line(sf::Lines, 2);
+        line[0].position = pos;
+        line[0].color = color;
+        line[1].position = pos + (vector);
+        line[1].color = color;
+        window.draw(line);
+    };
+
+    drawVectors(vel, sf::Color::Cyan);
+    drawVectors(acc, sf::Color::Red);
 }
 
 void Simulation::timeCounter(float dt) {
     simulationTime += dt;
-    int minutes = static_cast<int>(simulationTime) / 60;
-    int seconds = static_cast<int>(simulationTime) % 60;
-    int miliseconds = static_cast<int>((simulationTime - static_cast<int>(simulationTime)) * 1000);
 
-    std::string timeString = 
-    (minutes < 10 ? "0" : "") + std::to_string(minutes) + ":" +
-    (seconds < 10 ? "0" : "") + std::to_string(seconds) + ":" +
-    (miliseconds < 100 ? (miliseconds < 10 ? "00" : "0") : "") + std::to_string(miliseconds);
+    int totalMs = static_cast<int>(simulationTime * 1000);
+    int min = (totalMs / 60000);
+    int sec = (totalMs / 1000) % 60;
+    int ms = totalMs % 1000;
 
-    timeText.setString("Time: " + timeString);
+    char buffer[32];
+
+    snprintf(buffer, sizeof(buffer), "Time: %02d:%02d:%03d", min, sec, ms);
+    timeText.setString(buffer);
 }
 
 void Simulation::reset() {
     ants.clear();
+    ants.reserve(2000);
+
     simulationTime = 0.f;
     timeText.setString("Time: 00:00:000");
+    selectedAntIndex = -1;
+
     int numAnts = 5;
+    sf::Vector2u winSize = window.getSize();
+
     for (int i = 0; i < numAnts; ++i) {
-        float x = static_cast<float>(rand() % numAnts*10);
-        float y = static_cast<float>(rand() % numAnts*10);
+        float x = static_cast<float>(rand() % winSize.x);
+        float y = static_cast<float>(rand() % winSize.y);
         ants.emplace_back(antTexture, sf::Vector2f(x, y));
     }
-    selectedAntIndex = -1;
 }
 
 void Simulation::drag() {
@@ -186,6 +201,7 @@ void Simulation::drag() {
         sf::Vector2f current = window.mapPixelToCoords(sf::Mouse::getPosition(window));
         sf::Vector2f offset = dragStart - current;
         view.move(offset);
-        dragStart = current;
+
+        dragStart = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     }
 }
