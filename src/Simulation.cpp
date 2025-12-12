@@ -20,7 +20,7 @@ Simulation::Simulation()
     accelText.setCharacterSize(24);
     accelText.setFillColor(sf::Color::White);
     timeText.setPosition(20.f,20.f);
-    int numAnts = 1000;
+    int numAnts = 5;
 
     for (int i = 0; i < numAnts; ++i) {
         float x = static_cast<float>(rand() % numAnts*10);
@@ -80,6 +80,7 @@ void Simulation::processEvents() {
             if (event.key.code == sf::Keyboard::Space) {
                 if (!paused) {
                     paused = true;
+                    timeText.setString("PAUSED");
                 }
                 else {
                     paused = false;
@@ -170,6 +171,14 @@ void Simulation::timeCounter(float dt) {
 void Simulation::reset() {
     ants.clear();
     simulationTime = 0.f;
+    timeText.setString("Time: 00:00:000");
+    int numAnts = 5;
+    for (int i = 0; i < numAnts; ++i) {
+        float x = static_cast<float>(rand() % numAnts*10);
+        float y = static_cast<float>(rand() % numAnts*10);
+        ants.emplace_back(antTexture, sf::Vector2f(x, y));
+    }
+    selectedAntIndex = -1;
 }
 
 void Simulation::drag() {
