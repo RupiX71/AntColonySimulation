@@ -1,11 +1,12 @@
 #include <Simulation.hpp>
 #include <iostream>
-#include <iomanip> // For std::precision
+#include <iomanip>
 #include <sstream>
 
 Simulation::Simulation()
     : window(sf::VideoMode(1870,970), "Ant Colony Simulation") 
-    , view(window.getDefaultView()) // Initialize the view correctly
+    , view(window.getDefaultView()) 
+    , world(4000, 4000)
 {
 
     // Loading Files
@@ -109,15 +110,17 @@ void Simulation::handleInput(sf::Keyboard::Key key) {
 }
 
 void Simulation::update(float dt) {
+    world.update(dt);
     for (auto& ant : ants) {
-        ant.update(dt, window);
+        ant.update(dt);
     }
 }
 
 void Simulation::render() {
     window.clear(sf::Color(20, 20, 30));
-
     window.setView(view);
+
+    world.draw(window);
     for (auto& ant : ants) {
         ant.draw(window);
     }
@@ -180,18 +183,18 @@ void Simulation::timeCounter(float dt) {
 
 void Simulation::reset() {
     ants.clear();
-    ants.reserve(2000);
+    ants.reserve(500);
 
     simulationTime = 0.f;
     timeText.setString("Time: 00:00:000");
     selectedAntIndex = -1;
 
-    int numAnts = 5;
+    int numAnts = 250;
     sf::Vector2u winSize = window.getSize();
 
     for (int i = 0; i < numAnts; ++i) {
-        float x = static_cast<float>(rand() % winSize.x);
-        float y = static_cast<float>(rand() % winSize.y);
+        float x = static_cast<float>(rand() % winSize.x*10);
+        float y = static_cast<float>(rand() % winSize.y*10);
         ants.emplace_back(antTexture, sf::Vector2f(x, y));
     }
 }
@@ -199,7 +202,7 @@ void Simulation::reset() {
 void Simulation::drag() {
     if (isDragging) {
         sf::Vector2f current = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-        sf::Vector2f offset = dragStart - current;
+        sf::Vector2f offset = (dragStart - current); // Multiply by zoom factor
         view.move(offset);
 
         dragStart = window.mapPixelToCoords(sf::Mouse::getPosition(window));

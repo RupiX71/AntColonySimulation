@@ -25,7 +25,7 @@ void Ant::draw(sf::RenderWindow& window)
     window.draw(sprite);
 }
 
-void Ant::update(float dt, sf::RenderWindow& window)
+void Ant::update(float dt)
 {
     acceleration = sf::Vector2f(0.f,0.f);
 

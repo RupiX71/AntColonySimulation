@@ -17,7 +17,7 @@
 class Ant {
 public:
     Ant(sf::Texture& texture, sf::Vector2f startPos);
-    void update(float dt, sf::RenderWindow& window);
+    void update(float dt);
     void draw(sf::RenderWindow& window);
 
     const sf::Sprite& getSprite() const { return sprite; }

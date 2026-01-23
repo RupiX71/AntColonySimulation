@@ -17,6 +17,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <Ant.hpp>
+#include <World.hpp>
 #include <vector>
 
 /**
@@ -72,6 +73,8 @@ private:
     // ─────────────────────────────
     sf::RenderWindow window;                    ///< Main application window.
     sf::View view = window.getDefaultView();    ///< Camera view for zoom/pan control.
+
+    World world;                                ///< The simulation world.
 
     // ─────────────────────────────
     // Timing and Display
