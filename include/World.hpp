@@ -24,7 +24,7 @@ class World {
 
         bool isWall(sf::Vector2f position) const;
 
-        sf::Vector2u getSize() const;
+        sf::Vector2u getSize() const {return sf::Vector2u(width, height);};
 
     private:
         int width, height;
@@ -32,7 +32,7 @@ class World {
 
         std::vector<Cell> grid;
 
-        int getIndex(int x, int y) const;
-
         sf::VertexArray vertexArray;
+
+        int getIndexFromPos(sf::Vector2f pos) const;
 };

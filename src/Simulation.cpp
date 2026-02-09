@@ -4,9 +4,9 @@
 #include <sstream>
 
 Simulation::Simulation()
-    : window(sf::VideoMode(1870,970), "Ant Colony Simulation") 
+    : window(sf::VideoMode(1920,1080), "Ant Colony Simulation") 
     , view(window.getDefaultView()) 
-    , world(4000, 4000)
+    , world(2000, 2000)
 {
 
     // Loading Files
@@ -63,6 +63,16 @@ void Simulation::processEvents() {
                 window.close();
                 break;
             
+            case sf::Event::Resized:   // Only works for maximizing not for dragging the mouse to resize the window
+            {
+                sf::Vector2f newSize(static_cast<float>(event.size.width), 
+                                     static_cast<float>(event.size.height));
+                
+                sf::Vector2f currentCenter = view.getCenter();
+                view.setSize(newSize);
+                view.setCenter(currentCenter);
+            }
+
             case sf::Event::MouseWheelScrolled:
                 view.zoom(event.mouseWheelScroll.delta > 0 ? 0.9f : 1.1f);
                 break;
