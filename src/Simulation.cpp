@@ -6,7 +6,7 @@
 Simulation::Simulation()
     : window(sf::VideoMode(1920,1080), "Ant Colony Simulation") 
     , view(window.getDefaultView()) 
-    , world(2000, 2000)
+    , world(1000, 1000)
 {
 
     // Loading Files
@@ -15,7 +15,7 @@ Simulation::Simulation()
 
     auto setupText = [&](sf::Text& text, float yPos) {
         text.setFont(font);
-        text.setCharacterSize(20);
+        text.setCharacterSize(30.f);
         text.setFillColor(sf::Color::White);
         text.setPosition(20.f, yPos);
     };
@@ -60,39 +60,58 @@ void Simulation::processEvents() {
     while(window.pollEvent(event)) {
         switch(event.type) {
             case sf::Event::Closed:
+            {
                 window.close();
-                break;
+            }
+            break;
             
-            case sf::Event::Resized:   // Only works for maximizing not for dragging the mouse to resize the window
+            case sf::Event::Resized:   // guess what! im doing it right now
             {
                 sf::Vector2f newSize(static_cast<float>(event.size.width), 
                                      static_cast<float>(event.size.height));
-                
+                newSize *= currentZoom;  // Adjust for current zoom level
                 sf::Vector2f currentCenter = view.getCenter();
                 view.setSize(newSize);
-                view.setCenter(currentCenter);
+                view.setCenter(currentCenter); // Keep the center consistent
             }
+            break;
 
             case sf::Event::MouseWheelScrolled:
-                view.zoom(event.mouseWheelScroll.delta > 0 ? 0.9f : 1.1f);
-                break;
+            {
+                float zoomFactor = (event.mouseWheelScroll.delta > 0) ? 0.95f : 1.05f;
+                float newZoom = currentZoom * zoomFactor;
+
+                if (newZoom >= 0.05f && newZoom <= 1.05f) {
+                    currentZoom = newZoom;
+                    view.zoom(zoomFactor);
+                }
+            }
+            break;
             
             case sf::Event::MouseButtonPressed:
+            {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     isDragging = true;
-                    dragStart = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
+                    selectedAntIndex = -1; // Deselect any selected ant when starting to drag
+                    dragStart = window.mapPixelToCoords(sf::Mouse::getPosition(window), view);
                 }
-                break;
+            }
+            break;
             
             case sf::Event::MouseButtonReleased:
+            {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     isDragging = false;
                 }
-                break;
+            }
+            break;
 
             case sf::Event::KeyPressed:
+            {
                 handleInput(event.key.code);
-                break;
+            }
+            break;
 
             default: break;
         }
@@ -124,10 +143,15 @@ void Simulation::update(float dt) {
     for (auto& ant : ants) {
         ant.update(dt);
     }
+
+    if (selectedAntIndex != -1 && selectedAntIndex < ants.size()) {
+        sf::Vector2f antPos = ants[selectedAntIndex].getPosition();
+        view.setCenter(antPos);
+    }
 }
 
-void Simulation::render() {
-    window.clear(sf::Color(20, 20, 30));
+void Simulation::render() { // TO DO: Change the color of the ants from white to black 
+    window.clear(sf::Color(121, 71, 41)); // Bright Brown Background
     window.setView(view);
 
     world.draw(window);
@@ -168,7 +192,7 @@ void Simulation::renderSelectedAntDebug() {
         sf::VertexArray line(sf::Lines, 2);
         line[0].position = pos;
         line[0].color = color;
-        line[1].position = pos + (vector);
+        line[1].position = pos + (vector) * 0.5f;
         line[1].color = color;
         window.draw(line);
     };
@@ -211,10 +235,13 @@ void Simulation::reset() {
 
 void Simulation::drag() {
     if (isDragging) {
-        sf::Vector2f current = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        sf::Vector2f current = window.mapPixelToCoords(sf::Mouse::getPosition(window), view);
         sf::Vector2f offset = (dragStart - current); // Multiply by zoom factor
         view.move(offset);
 
-        dragStart = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        // Update dragStart to the new position for smooth dragging
+        // Note: AS the view just moved, now the mouse points to a new place
+        // The ideal is to recalculate the dragStart after moving the view so the draggin is smooth
+        dragStart = window.mapPixelToCoords(sf::Mouse::getPosition(window), view);
     }
 }

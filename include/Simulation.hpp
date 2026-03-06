@@ -73,6 +73,7 @@ private:
     // ─────────────────────────────
     sf::RenderWindow window;                    ///< Main application window.
     sf::View view = window.getDefaultView();    ///< Camera view for zoom/pan control.
+    float currentZoom = 1.0f;                   ///< Current zoom level of the view.
 
     World world;                                ///< The simulation world.
 
