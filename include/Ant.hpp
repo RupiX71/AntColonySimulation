@@ -2,7 +2,7 @@
  * @file Ant.hpp
  * @brief Defines the Ant class using the integration of Semi-Implicit Euler's method for movement using
  * Newton's second law of motion. The wander behaviour method using the Craig Reynolds's steering behaviour
- * algorithm is implemented to give the ants a more natural movement patter. The animation of 
+ * algorithm is implemented to give the ants a more natural movement pattern. The animation of 
  * the Ants is also handled in this class, using a sprite sheet and a clock to manage the animation frames.
  * 
  * TODO: Implement other behaviours like seeking, fleeing, and obstacle avoidance to make the ants more interactive with their environment.
@@ -13,33 +13,46 @@
 
 #pragma once
 #include <SFML/Graphics.hpp>
-
+#include <World.hpp>
 /**
  * @class Ant
  * @brief Manages the entire Ant behaviour
 */
 
 class Ant {
+    
 public:
     Ant(sf::Texture& texture, sf::Vector2f startPos);
-    void update(float dt);
+
+    void update(float dt, sf::Vector2f targetPosition, bool followMouse);
     void draw(sf::RenderWindow& window);
 
+    void updateVertices(sf::Vertex* triangle) const;
     const sf::Sprite& getSprite() const { return sprite; }
     sf::Vector2f getPosition() const { return sprite.getPosition(); }
     sf::Vector2f getVelocity() const { return velocity; }
     sf::Vector2f getAcceleration() const { return acceleration; }
 
+    // Debug things
+    sf::Vector2f getWanderCenter() const { return wanderCenter; }
+    sf::Vector2f getWanderTarget() const { return wanderTarget; }
+    float getWanderRadius() const { return wanderRadius; }
+
 private:
-    sf::Sprite sprite;          // Sprite of the Ant
+    sf::Sprite sprite;              // Sprite of the Ant
 
-    sf::Vector2f velocity;      // Vector Velocity
-    sf::Vector2f acceleration;  // Vector Acceleration
+    sf::Vector2f velocity;          // Vector Velocity
+    sf::Vector2f acceleration;      // Vector Acceleration
+    sf::Vector2f wanderCenter;      // Just for debug thingies
+    sf::Vector2f wanderTarget;      // Just for debug aswell
 
-    float maxSpeed;             // Max Speed
-    float maxForce;             // Max 
-    float wanderAngle;          // Angle of wandering
-    float mass;                 // Mass of the Ant
+    float maxVelocity;              // Max Speed
+    float maxAcceleration;          // Max Acceleration
+    float steerStrength;            // Strength of steer
+    float mass;                     // Mass of the Ant
+    float wanderAngle;                  //
+    float wanderDistance;               //
+    float wanderRadius;                 //
 
     sf::Clock animationClock;   // Clock for the sprite animation
     int currentFrame;           // Frame counter for animation
@@ -48,15 +61,13 @@ private:
     int frameWidth;             // Frame width
     int frameHeight;            // Frame height
 
-    void wander(float dt);                                  // Wander Function
-    void move(float dt);                                    // Move function
-    void calculateWanderForce(float dt);                    // Wander Force calculation function
-    void steerTowards(const sf::Vector2f& desired);         // Steer function
-    void applyForce(const sf::Vector2f& force);             // Force application function
-    void integratePhysics(float dt);                        // Physics integration function
+    sf::Vector2f seek(sf::Vector2f target);
+    sf::Vector2f wander(float dt);
+
+    void move();                                            // Move function
     void animate();                                         // Animate function
 
-    static float randomFloat(float min, float max);         // Random value function 
-    static sf::Vector2f normalized(const sf::Vector2f& v);  // Normalizing function
-    static float length(const sf::Vector2f& v);            // Length function
+    float length(const sf::Vector2f &v);                    // Length Function
+    sf::Vector2f normalize(const sf::Vector2f& v);          // Normalize Function
+    float randomFloat(float min, float max);
 };

@@ -17,7 +17,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <Ant.hpp>
-#include <World.hpp>
 #include <vector>
 
 /**
@@ -74,9 +73,7 @@ private:
     sf::RenderWindow window;                    ///< Main application window.
     sf::View view = window.getDefaultView();    ///< Camera view for zoom/pan control.
     float currentZoom = 1.0f;                   ///< Current zoom level of the view.
-
-    World world;                                ///< The simulation world.
-
+    
     // ─────────────────────────────
     // Timing and Display
     // ─────────────────────────────
@@ -85,6 +82,7 @@ private:
     float accumulator = 0.0f;                   ///< Acumulator.
     sf::Font font;                              ///< Font used for text rendering.
     sf::Text timeText;                          ///< Displays simulation time.
+    sf::Text posText;                           ///< Displays selected ant position (debug).
     sf::Text velText;                           ///< Displays selected ant velocity (debug).
     sf::Text accelText;                         ///< Displays selected ant acceleration (debug).
 
@@ -98,7 +96,7 @@ private:
     // Simulation Control
     // ─────────────────────────────
     bool paused = false;                        ///< Indicates whether the simulation is paused.
-    bool stepOnce = false;                      ///< Allows advancing a single frame when paused.
+    bool followMouse = false;                   ///< Changes the behaviour of ants to follow mouse or wander.
     float simulationTime = 0.f;                 ///< Elapsed time since simulation start (in seconds).
     int selectedAntIndex = -1;                  ///< Index of the currently selected ant (-1 = none).
 
@@ -107,4 +105,5 @@ private:
     // ─────────────────────────────
     sf::Texture antTexture;                     ///< Texture used by all ants.
     std::vector<Ant> ants;                      ///< List of all active ants.
+    sf::VertexArray antVerticies;               ///<
 };
