@@ -138,7 +138,11 @@ void Ant::updateVertices(sf::Vertex* triangles) const{
 
     triangles[3].position = topLeft; triangles[3].texCoords = texTopLeft;
     triangles[4].position = bottomRight; triangles[4].texCoords = texBottomRight;
-    triangles[5].position = bottomLeft; triangles[5].texCoords = texBottomLeft;   
+    triangles[5].position = bottomLeft; triangles[5].texCoords = texBottomLeft;
+
+    for(int i = 0 ; i < 6 ; i++) {
+        triangles[i].color = sf::Color::Black;
+    }
 }
 
 void Ant::animate()

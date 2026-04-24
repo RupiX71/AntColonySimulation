@@ -29,7 +29,7 @@ public:
     /**
      * @brief Constructs and initializes the simulation window, font, and entities.
      */
-    Simulation();
+    Simulation(int numAnts = 50000);
 
     /**
      * @brief Cleans up simulation resources.
@@ -85,6 +85,7 @@ private:
     sf::Text posText;                           ///< Displays selected ant position (debug).
     sf::Text velText;                           ///< Displays selected ant velocity (debug).
     sf::Text accelText;                         ///< Displays selected ant acceleration (debug).
+    sf::Text antSelectedText;                   ///< Displays selected ant (debug).
 
     // ─────────────────────────────
     // Camera Interaction
@@ -99,7 +100,8 @@ private:
     bool followMouse = false;                   ///< Changes the behaviour of ants to follow mouse or wander.
     float simulationTime = 0.f;                 ///< Elapsed time since simulation start (in seconds).
     int selectedAntIndex = -1;                  ///< Index of the currently selected ant (-1 = none).
-
+    int initialAntCount;                        ///< Initial ant count
+    
     // ─────────────────────────────
     // Entities
     // ─────────────────────────────

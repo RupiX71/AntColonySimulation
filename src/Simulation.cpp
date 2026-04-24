@@ -4,9 +4,10 @@
 #include <cmath>
 #include <sstream>
 
-Simulation::Simulation()
+Simulation::Simulation(int numAnts)
     : window(sf::VideoMode(1920,1080), "Ant Colony Simulation") 
     , view(window.getDefaultView()) 
+    , initialAntCount(numAnts)
 {
 
     // Loading Files
@@ -24,6 +25,7 @@ Simulation::Simulation()
     setupText(posText, 40.f);
     setupText(velText, 60.f);
     setupText(accelText, 80.f);
+    setupText(antSelectedText, 100.f);
 
     // Initial Reset
     reset();
@@ -145,7 +147,7 @@ void Simulation::handleInput(sf::Keyboard::Key key) {
 
 void Simulation::update(float dt) {
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window), view);
-    # pragma omp parallel for            // this is a cool bit of parallelization
+    // # pragma omp parallel for            // this is a cool bit of parallelization
     for (auto& ant : ants) {
         ant.update(dt, mousePos, followMouse);
     }
@@ -179,6 +181,7 @@ void Simulation::render() { // TO DO: Change the color of the ants from white to
         window.draw(posText);
         window.draw(velText);
         window.draw(accelText);
+        window.draw(antSelectedText);
     }
 
     window.display();
@@ -194,14 +197,16 @@ void Simulation::renderSelectedAntDebug()
     sf::Vector2f vel = selected.getVelocity();
     sf::Vector2f acc = selected.getAcceleration();
 
-    std::ostringstream ssPos, ssVel, ssAcc;
+    std::ostringstream ssPos, ssVel, ssAcc, ssAst;
     ssPos << std::fixed << std::setprecision(2) << "Pos: (" << pos.x << ", " << pos.y << ")"; 
     ssVel << std::fixed << std::setprecision(2) << "Vel: (" << vel.x << ", " << vel.y << ")";
     ssAcc << std::fixed << std::setprecision(2) << "Acc: (" << acc.x << ", " << acc.y << ")";
-
+    ssAst << "Ant: " << selectedAntIndex;
+    
     posText.setString(ssPos.str());
     velText.setString(ssVel.str());
     accelText.setString(ssAcc.str());
+    antSelectedText.setString(ssAst.str());
 
     // --- Vector drawing ---
     auto drawVector = [&](sf::Vector2f vector, sf::Color color)
@@ -263,20 +268,18 @@ void Simulation::timeCounter(float dt) {
 
 void Simulation::reset() {
     ants.clear();
-    ants.reserve(100000);
+    ants.reserve(initialAntCount);
 
     simulationTime = 0.f;
     timeText.setString("Time: 00:00:000");
     selectedAntIndex = -1;
 
-    int numAnts = 10000;
-
-    for (int i = 0; i < numAnts; ++i) {
+    for (int i = 0; i < initialAntCount; ++i) {
         // Cool little code i made just to instead of spawning in a square
         // The ants will spawn in a circle lmao just fun
 
         float radius_x = static_cast<float>(rand() % 1000);
-        float radius_y = static_cast<float>(rand() % 500);
+        float radius_y = static_cast<float>(rand() % 1000);
         float random_angle = (static_cast<float>(rand() / static_cast<float> (RAND_MAX)) * (M_PI*4));
 
         ants.emplace_back(antTexture, sf::Vector2f(std::cos(random_angle) * radius_x, std::sin(random_angle) * radius_y));
